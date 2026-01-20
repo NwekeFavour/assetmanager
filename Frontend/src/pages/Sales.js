@@ -21,21 +21,21 @@ function Sales() {
   // --- Fixed Fetch Functions with useCallback and Dependency Arrays ---
 
   const fetchSalesData = useCallback(() => {
-    fetch(`http://localhost:4000/api/sales/get/${authContext.user}`)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/sales/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllSalesData(data))
       .catch((err) => console.log(err));
   }, [authContext.user]);
 
   const fetchProductsData = useCallback(() => {
-    fetch(`http://localhost:4000/api/product/get/${authContext.user}`)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllProducts(data))
       .catch((err) => console.log(err));
   }, [authContext.user]);
 
   const fetchStoresData = useCallback(() => {
-    fetch(`http://localhost:4000/api/store/get/${authContext.user}`)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/store/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllStores(data))
       .catch((err) => console.log(err));
