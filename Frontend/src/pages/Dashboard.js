@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from "react"; // Added useCallback
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import Chart from "react-apexcharts";
 import AuthContext from "../AuthContext";
 import { Doughnut } from "react-chartjs-2";
@@ -6,186 +6,154 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export const data = {
-  labels: ["Apple", "Knorr", "Shoop", "Green", "Purple", "Orange"],
-  datasets: [
-    {
-      label: "# of Votes",
-      data: [0, 1, 5, 8, 9, 15],
-      backgroundColor: [
-        "rgba(255, 99, 132, 0.2)",
-        "rgba(54, 162, 235, 0.2)",
-        "rgba(255, 206, 86, 0.2)",
-        "rgba(75, 192, 192, 0.2)",
-        "rgba(153, 102, 255, 0.2)",
-        "rgba(255, 159, 64, 0.2)",
-      ],
-      borderColor: [
-        "rgba(255, 99, 132, 1)",
-        "rgba(54, 162, 235, 1)",
-        "rgba(255, 206, 86, 1)",
-        "rgba(75, 192, 192, 1)",
-        "rgba(153, 102, 255, 1)",
-        "rgba(255, 159, 64, 1)",
-      ],
-      borderWidth: 1,
-    },
-  ],
-};
-
 function Dashboard() {
-  const [saleAmount, setSaleAmount] = useState("");
-  const [purchaseAmount, setPurchaseAmount] = useState("");
+  const [stockValue, setStockValue] = useState(0);
+  const [outOfStock, setOutOfStock] = useState(0);
   const [stores, setStores] = useState([]);
   const [products, setProducts] = useState([]);
   const authContext = useContext(AuthContext);
 
   const [chart, setChart] = useState({
     options: {
-      chart: { id: "basic-bar" },
+      chart: { id: "asset-growth", toolbar: { show: false } },
+      colors: ['#8f5273'],
+      plotOptions: { bar: { borderRadius: 8, columnWidth: '40%' } },
       xaxis: {
         categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        labels: { style: { fontWeight: 700 } }
       },
     },
-    series: [
-      {
-        name: "series",
-        data: [10, 20, 40, 50, 60, 20, 10, 35, 45, 70, 25, 70],
-      },
-    ],
+    series: [{ name: "Inventory Value", data: [] }],
   });
 
-  // Update Chart Data Helper
-  const updateChartData = useCallback((salesData) => {
-    setChart((prevChart) => ({
-      ...prevChart,
-      series: [
-        {
-          name: "Monthly Sales Amount",
-          data: [...salesData],
-        },
-      ],
-    }));
-  }, []);
-
-  // --- Fixed Fetch Functions with useCallback ---
-
-  const fetchTotalSaleAmount = useCallback(() => {
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/sales/get/${authContext.user}/totalsaleamount`)
-      .then((response) => response.json())
-      .then((datas) => setSaleAmount(datas.totalSaleAmount))
-      .catch((err) => console.log(err));
+  // 1. Fetch Total Inventory Valuation (Sum of Price * Quantity)
+  const fetchInventoryValuation = useCallback(() => {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${authContext.user}/valuation`)
+      .then((res) => res.json())
+      .then((data) => setStockValue(data.totalValue || 0))
+      .catch((err) => console.error("Valuation Error:", err));
   }, [authContext.user]);
 
-  const fetchTotalPurchaseAmount = useCallback(() => {
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/purchase/get/${authContext.user}/totalpurchaseamount`)
-      .then((response) => response.json())
-      .then((datas) => setPurchaseAmount(datas.totalPurchaseAmount))
-      .catch((err) => console.log(err));
+  // 2. Fetch Low Stock/Out of Stock Count
+  const fetchStockAlerts = useCallback(() => {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${authContext.user}/lowstock`)
+      .then((res) => res.json())
+      .then((data) => setOutOfStock(data.count || 0))
+      .catch((err) => console.error("Alerts Error:", err));
   }, [authContext.user]);
 
   const fetchStoresData = useCallback(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/store/get/${authContext.user}`)
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((datas) => setStores(datas))
       .catch((err) => console.log(err));
   }, [authContext.user]);
 
   const fetchProductsData = useCallback(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${authContext.user}`)
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((datas) => setProducts(datas))
       .catch((err) => console.log(err));
   }, [authContext.user]);
 
-  const fetchMonthlySalesData = useCallback(() => {
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/sales/getmonthly`)
-      .then((response) => response.json())
-      .then((datas) => updateChartData(datas.salesAmount))
-      .catch((err) => console.log(err));
-  }, [updateChartData]);
-
   useEffect(() => {
-    fetchTotalSaleAmount();
-    fetchTotalPurchaseAmount();
+    fetchInventoryValuation();
+    fetchStockAlerts();
     fetchStoresData();
     fetchProductsData();
-    fetchMonthlySalesData();
-  }, [
-    fetchTotalSaleAmount, 
-    fetchTotalPurchaseAmount, 
-    fetchStoresData, 
-    fetchProductsData, 
-    fetchMonthlySalesData
-  ]);
+  }, [fetchInventoryValuation, fetchStockAlerts, fetchStoresData, fetchProductsData]);
+
+  // Dynamic Doughnut Data based on actual Product Categories
+  const categoryData = {
+    labels: [...new Set(products.map(p => p.category || "Uncategorized"))],
+    datasets: [{
+      data: [...new Set(products.map(p => p.category))].map(cat => 
+        products.filter(p => p.category === cat).length
+      ),
+      backgroundColor: ["#8f5273", "#b37b9a", "#5e344a", "#d9b3c7", "#452234"],
+      borderWidth: 0,
+    }]
+  };
 
   return (
     <div className="flex flex-col gap-8 p-4 sm:p-8">
-      {/* Stat Cards Section */}
+      {/* Asset Management Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <DashboardStatCard 
-          title="Sales" 
-          value={`₦${saleAmount}`} 
-          trend="67.81%" 
+          title="Total Inventory Value" 
+          value={`₦${stockValue.toLocaleString()}`} 
+          trend="Valuation" 
           trendUp={true} 
-          subtext="from ₦240.94" 
+          subtext="Total Asset Worth" 
         />
         <DashboardStatCard 
-          title="Purchase" 
-          value={`₦${purchaseAmount}`} 
-          trend="67.81%" 
+          title="Stock Alerts" 
+          value={outOfStock} 
+          trend="Critical" 
           trendUp={false} 
-          subtext="from ₦404.32" 
+          subtext="Low/Out of Stock" 
         />
         <DashboardStatCard 
-          title="Total Products" 
+          title="Total SKUs" 
           value={products.length} 
+          trend="Items" 
+          trendUp={true} 
+          subtext="Unique Asset Types"
+        />
+        <DashboardStatCard 
+          title="Storage Nodes" 
+          value={stores.length} 
           trend="Active" 
           trendUp={true} 
-        />
-        <DashboardStatCard 
-          title="Total Stores" 
-          value={stores.length} 
-          trend="Online" 
-          trendUp={true} 
+          subtext="Active Warehouses"
         />
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm w-full">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 w-full">
+        {/* Main Asset Flow Chart */}
+        <div className="xl:col-span-2 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
           <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">
-            Monthly Revenue Flow
+            Inventory Turnover Trends
           </h3>
-          <div className="h-[300px] w-full">
-            <Chart
-              options={{
-                ...chart.options,
-                colors: ['#8f5273'],
-                plotOptions: { bar: { borderRadius: 8 } },
-                chart: { ...chart.options.chart, toolbar: { show: false } }
-              }}
-              series={chart.series}
-              type="bar"
-              width="100%"
-              height="100%"
-            />
+          <div className="h-[350px] w-full">
+            <Chart options={chart.options} series={chart.series} type="bar" width="100%" height="100%" />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm w-full">
+        {/* Category Breakdown */}
+        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
           <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">
-            Category Distribution
+            Asset Composition
           </h3>
-          <div className="h-[300px] w-full flex justify-center">
-            <Doughnut 
-              data={data} 
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { weight: 'bold' } } } }
-              }} 
-            />
+          
+          <div className="h-[300px] w-full flex flex-col justify-center items-center relative">
+            {products.length > 0 ? (
+              <Doughnut 
+                data={categoryData} 
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { 
+                    legend: { 
+                      position: 'bottom', 
+                      labels: { boxWidth: 12, font: { weight: 'bold' }, padding: 20 } 
+                    } 
+                  }
+                }} 
+              />
+            ) : (
+              /* --- Empty State Placeholder --- */
+              <div className="flex flex-col items-center animate-in fade-in duration-700">
+                {/* Decorative Ring Placeholder */}
+                <div className="relative w-40 h-40 rounded-full border-[12px] border-gray-50 flex items-center justify-center mb-6">
+                  <div className="w-24 h-24 rounded-full border-[12px] border-gray-50/50"></div>
+                  <div className="absolute inset-0 border-[12px] border-dashed border-gray-100 rounded-full"></div>
+                </div>
+                
+                <p className="text-gray-900 font-black text-sm tracking-tight uppercase">No Assets Logged</p>
+                <p className="text-gray-400 font-bold text-[10px] tracking-tighter mt-1">Add items to see category breakdown</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -193,25 +161,17 @@ function Dashboard() {
   );
 }
 
-// Reusable Stat Card Component for cleaner Dashboard code
 function DashboardStatCard({ title, value, trend, trendUp, subtext }) {
   return (
     <article className="flex flex-col gap-4 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
-      <div className={`inline-flex gap-2 self-end rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-wider ${trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+      <div className={`inline-flex gap-2 self-start rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-wider ${trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
         <span>{trend}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d={trendUp ? "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" : "M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"} />
-        </svg>
       </div>
       <div>
-        <strong className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">
-          {title}
-        </strong>
+        <strong className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">{title}</strong>
         <p className="mt-1">
-          <span className="text-2xl font-black text-gray-900 tracking-tight">
-            {value}
-          </span>
-          {subtext && <span className="ml-2 text-[10px] font-bold text-gray-400 italic block"> {subtext} </span>}
+          <span className="text-2xl font-black text-gray-900 tracking-tight">{value}</span>
+          {subtext && <span className="text-[10px] font-bold text-gray-400 block mt-1 uppercase tracking-tighter">{subtext}</span>}
         </p>
       </div>
     </article>

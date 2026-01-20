@@ -8,15 +8,40 @@ import {
 import AuthContext from "../AuthContext";
 
 const notifications = [
-  { id: 1, title: "Low Stock Alert", message: "iPhone 13 Pro is below 5 units", time: "2 min ago", icon: Package, color: "text-red-500", bg: "bg-red-50" },
-  { id: 2, title: "New Sale", message: "Order #4432 confirmed", time: "1 hour ago", icon: Info, color: "text-blue-500", bg: "bg-blue-50" },
+  { 
+    id: 1, 
+    title: "Critical Stock Alert", 
+    message: "iPhone 13 Pro is below 5 units", 
+    time: "2 min ago", 
+    icon: Package, 
+    color: "text-rose-600", 
+    bg: "bg-rose-50" 
+  },
+  { 
+    id: 2, 
+    title: "Asset Restocked", 
+    message: "12x Dell Monitors added to Store A", 
+    time: "45 min ago", 
+    icon: ShoppingCart, 
+    color: "text-emerald-600", 
+    bg: "bg-emerald-50" 
+  },
+  { 
+    id: 3, 
+    title: "Store Update", 
+    message: "Main Warehouse reached 85% capacity", 
+    time: "3 hours ago", 
+    icon: Store, 
+    color: "text-amber-600", 
+    bg: "bg-amber-50" 
+  },
 ];
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Inventory', href: '/inventory', icon: Package },
   { name: 'Purchase', href: '/purchase', icon: ShoppingCart },
-  { name: 'Sales', href: '/sales', icon: ClipboardList },
+  { name: 'Disposals & Transfers', href: '/sales', icon: ClipboardList },
   { name: 'Stores', href: '/stores', icon: Store },
 ];
 

@@ -81,7 +81,7 @@ function Login() {
             <p className="mt-2 text-center text-sm text-gray-600">
               Or
               <span
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-[#8f5273] hover:text-[#8f5273]/40"
               >
                 start your 14-day free trial
               </span>
@@ -142,7 +142,7 @@ function Login() {
 
               <div className="text-sm">
                 <span
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-[#8f5273] hover:text-[#8f5273]/90"
                 >
                   Forgot your password?
                 </span>
@@ -152,7 +152,7 @@ function Login() {
             <div>
               <button
                 type="submit"
-                className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="group relative flex w-full justify-center rounded-md bg-[#8f5273]/80 py-2 px-3 text-sm font-semibold text-white hover:bg-[#8f5273]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8f5273]"
                 onClick={loginUser}
               >
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -166,7 +166,7 @@ function Login() {
               <p className="mt-2 text-center text-sm text-gray-600">
                 Or{" "}
                 <span
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-[#8f5273] hover:text-indigo-500"
                 >
                   Don't Have an Account, Please{" "}
                   <Link to="/register"> Register now </Link>

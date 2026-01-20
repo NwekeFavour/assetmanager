@@ -158,7 +158,7 @@ function Register() {
 
               <div className="text-sm">
                 <span
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-[#8f5273] hover:text-[#8f5273]/80"
                 >
                   Forgot your password?
                 </span>
@@ -168,7 +168,7 @@ function Register() {
             <div>
               <button
                 type="submit"
-                className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="group relative flex w-full justify-center rounded-md bg-[#8f5273]/80 py-2 px-3 text-sm font-semibold text-white hover:bg-[#8f5273]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8f5273]"
                 onClick={registerUser}
               >
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -179,10 +179,10 @@ function Register() {
                 </span>
                 Sign up
               </button>
-              <p className="mt-2 text-center text-sm text-gray-600">
+              <p className="mt-2 text-center text-sm text-[#8f5273]">
                 Or{" "}
                 <span
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-[#8f5273] hover:text-[#8f5273]/80"
                 >
                   Already Have an Account, Please
                   <Link to="/login"> Signin now </Link>

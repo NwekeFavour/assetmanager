@@ -17,7 +17,7 @@ function SideMenu() {
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Inventory", href: "/inventory", icon: Package },
     { name: "Purchase Details", href: "/purchase-details", icon: ShoppingCart },
-    { name: "Sales", href: "/sales", icon: BarChart3 },
+    { name: "Disposals & Transfers", href: "/sales", icon: BarChart3 },
     { name: "Manage Store", href: "/manage-store", icon: Store },
   ];
 
