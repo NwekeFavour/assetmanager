@@ -3,8 +3,10 @@ import {
   LayoutDashboard, 
   Package, 
   BarChart3, 
-  Settings, 
+  Settings,
+  LocateFixed, 
 } from "lucide-react"; // Install lucide-react for sharper icons
+import { CubeIcon } from "@heroicons/react/24/outline";
 
 function SideMenu() {
   const location = useLocation();
@@ -14,6 +16,8 @@ function SideMenu() {
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Inventory", href: "/inventory", icon: Package },
     { name: "Disposals & Transfers", href: "/sales", icon: BarChart3 },
+    { name: "Categories", href: "#", icon: CubeIcon },
+    { name: "Locations", href: "#", icon: LocateFixed },
   ];
 
   return (

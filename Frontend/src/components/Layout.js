@@ -17,7 +17,7 @@ function Layout() {
         <Header />
 
         {/* Main Content Area: Scrolls independently */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-3  lg:p-4">
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>

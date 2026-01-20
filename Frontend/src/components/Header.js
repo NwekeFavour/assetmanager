@@ -1,46 +1,58 @@
 import { Fragment, useContext, useState } from "react";
 import { Menu, Transition, Popover, Dialog } from "@headlessui/react";
-import { 
-  Bell, Search, Plus, LogOut, Package, 
-  Menu as MenuIcon, X, LayoutDashboard, Store, 
-  ShoppingCart, ClipboardList 
+import {
+  Bell,
+  Search,
+  Plus,
+  LogOut,
+  Package,
+  Menu as MenuIcon,
+  X,
+  LayoutDashboard,
+  Store,
+  ShoppingCart,
+  ClipboardList,
+  LocateFixed,
 } from "lucide-react";
 import AuthContext from "../AuthContext";
+import { CubeIcon } from "@heroicons/react/24/outline";
 
 const notifications = [
-  { 
-    id: 1, 
-    title: "Critical Stock Alert", 
-    message: "iPhone 13 Pro is below 5 units", 
-    time: "2 min ago", 
-    icon: Package, 
-    color: "text-rose-600", 
-    bg: "bg-rose-50" 
+  {
+    id: 1,
+    title: "Critical Stock Alert",
+    message: "iPhone 13 Pro is below 5 units",
+    time: "2 min ago",
+    icon: Package,
+    color: "text-rose-600",
+    bg: "bg-rose-50",
   },
-  { 
-    id: 2, 
-    title: "Asset Restocked", 
-    message: "12x Dell Monitors added to Store A", 
-    time: "45 min ago", 
-    icon: ShoppingCart, 
-    color: "text-emerald-600", 
-    bg: "bg-emerald-50" 
+  {
+    id: 2,
+    title: "Asset Restocked",
+    message: "12x Dell Monitors added to Store A",
+    time: "45 min ago",
+    icon: ShoppingCart,
+    color: "text-emerald-600",
+    bg: "bg-emerald-50",
   },
-  { 
-    id: 3, 
-    title: "Store Update", 
-    message: "Main Warehouse reached 85% capacity", 
-    time: "3 hours ago", 
-    icon: Store, 
-    color: "text-amber-600", 
-    bg: "bg-amber-50" 
+  {
+    id: 3,
+    title: "Store Update",
+    message: "Main Warehouse reached 85% capacity",
+    time: "3 hours ago",
+    icon: Store,
+    color: "text-amber-600",
+    bg: "bg-amber-50",
   },
 ];
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Inventory', href: '/inventory', icon: Package },
-  { name: 'Disposals & Transfers', href: '/sales', icon: ClipboardList },
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Inventory", href: "/inventory", icon: Package },
+  { name: "Disposals & Transfers", href: "/sales", icon: ClipboardList },
+  { name: "Categories", href: "#", icon: CubeIcon },
+  { name: "Locations", href: "#", icon: LocateFixed},
 ];
 
 export default function Header() {
@@ -50,8 +62,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
-        
+      <header className="sticky top-0 z-10 flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
         {/* Mobile Menu Button & Brand */}
         <div className="flex items-center gap-4 lg:hidden">
           <button
@@ -108,15 +119,26 @@ export default function Header() {
               <Popover.Panel className="absolute right-0 z-50 mt-3 w-80 transform px-4 sm:px-0">
                 <div className="overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 bg-white border border-gray-100">
                   <div className="p-4 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
-                    <span className="font-bold text-gray-900">Notifications</span>
+                    <span className="font-bold text-gray-900">
+                      Notifications
+                    </span>
                   </div>
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.map((item) => (
-                      <div key={item.id} className="p-4 flex gap-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0">
-                        <div className={`mt-1 p-2 rounded-lg ${item.bg}`}><item.icon className={`h-4 w-4 ${item.color}`} /></div>
+                      <div
+                        key={item.id}
+                        className="p-4 flex gap-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0"
+                      >
+                        <div className={`mt-1 p-2 rounded-lg ${item.bg}`}>
+                          <item.icon className={`h-4 w-4 ${item.color}`} />
+                        </div>
                         <div>
-                          <p className="text-sm font-bold text-gray-900">{item.title}</p>
-                          <p className="text-xs text-gray-500">{item.message}</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {item.title}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {item.message}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -133,7 +155,10 @@ export default function Header() {
             <Menu.Button className="flex rounded-full ring-2 ring-transparent hover:ring-[#8f5273]/20 transition-all focus:outline-none">
               <img
                 className="h-9 w-9 rounded-full border border-gray-200 object-cover"
-                src={userData.imageUrl || `https://ui-avatars.com/api/?name=${userData.firstName}`}
+                src={
+                  userData.imageUrl ||
+                  `https://ui-avatars.com/api/?name=${userData.firstName}`
+                }
                 alt="User"
               />
             </Menu.Button>
@@ -148,13 +173,20 @@ export default function Header() {
             >
               <Menu.Items className="absolute right-0 mt-2 w-52 origin-top-right divide-y divide-gray-100 rounded-xl bg-white shadow-xl ring-1 ring-black/5 p-1 focus:outline-none">
                 <div className="px-4 py-3">
-                  <p className="text-xs text-gray-500 font-medium">Signed in as</p>
-                  <p className="text-sm font-bold text-gray-900 truncate">{userData.email || "User"}</p>
+                  <p className="text-xs text-gray-500 font-medium">
+                    Signed in as
+                  </p>
+                  <p className="text-sm font-bold text-gray-900 truncate">
+                    {userData.email || "User"}
+                  </p>
                 </div>
                 <div className="py-1">
                   <Menu.Item>
                     {({ active }) => (
-                      <button onClick={() => authContext.signout()} className={`${active ? "bg-red-50 text-red-600" : "text-gray-700"} flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg`}>
+                      <button
+                        onClick={() => authContext.signout()}
+                        className={`${active ? "bg-red-50 text-red-600" : "text-gray-700"} flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg`}
+                      >
                         <LogOut className="h-4 w-4" /> Sign out
                       </button>
                     )}
@@ -168,7 +200,11 @@ export default function Header() {
 
       {/* Mobile Navigation Dialog (Drawer) */}
       <Transition.Root show={mobileMenuOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50 lg:hidden" onClose={setMobileMenuOpen}>
+        <Dialog
+          as="div"
+          className="relative z-50 lg:hidden"
+          onClose={setMobileMenuOpen}
+        >
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -195,24 +231,35 @@ export default function Header() {
                 <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
                   <div className="flex h-16 shrink-0 items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#8f5273] text-white font-bold">I</div>
-                      <span className="text-xl font-black tracking-tight text-gray-900">Inventory</span>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#8f5273] text-white font-bold">
+                        I
+                      </div>
+                      <span className="text-xl font-black tracking-tight text-gray-900">
+                        Inventory
+                      </span>
                     </div>
-                    <button type="button" className="-m-2.5 p-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
+                    <button
+                      type="button"
+                      className="-m-2.5 p-2.5 text-gray-700"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       <X className="h-6 w-6" aria-hidden="true" />
                     </button>
                   </div>
                   <nav className="flex flex-1 flex-col">
-                    <ul  className="flex flex-1 flex-col gap-y-7">
+                    <ul className="flex flex-1 flex-col gap-y-7">
                       <li>
-                        <ul  className="-mx-2 space-y-1">
+                        <ul className="-mx-2 space-y-1">
                           {navigation.map((item) => (
                             <li key={item.name}>
                               <a
                                 href={item.href}
                                 className="group flex gap-x-3 rounded-xl p-3 text-sm font-bold leading-6 text-gray-700 hover:bg-[#8f5273]/5 hover:text-[#8f5273] transition-colors"
                               >
-                                <item.icon className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-[#8f5273]" aria-hidden="true" />
+                                <item.icon
+                                  className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-[#8f5273]"
+                                  aria-hidden="true"
+                                />
                                 {item.name}
                               </a>
                             </li>
@@ -224,7 +271,10 @@ export default function Header() {
                           onClick={() => authContext.signout()}
                           className="group -mx-2 flex gap-x-3 rounded-xl p-3 text-sm font-bold leading-6 text-red-600 hover:bg-red-50 w-full"
                         >
-                          <LogOut className="h-6 w-6 shrink-0 text-red-400 group-hover:text-red-600" aria-hidden="true" />
+                          <LogOut
+                            className="h-6 w-6 shrink-0 text-red-400 group-hover:text-red-600"
+                            aria-hidden="true"
+                          />
                           Logout
                         </button>
                       </li>
