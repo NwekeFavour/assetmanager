@@ -83,13 +83,7 @@ function Dashboard() {
 
   const authContext = useContext(AuthContext);
 
-  useEffect(() => {
-    fetchTotalSaleAmount();
-    fetchTotalPurchaseAmount();
-    fetchStoresData();
-    fetchProductsData();
-    fetchMonthlySalesData();
-}, [fetchTotalSaleAmount, fetchTotalPurchaseAmount, fetchStoresData, fetchProductsData, fetchMonthlySalesData]);
+
   // Fetching total sales amount
   const fetchTotalSaleAmount = () => {
     fetch(
@@ -130,6 +124,14 @@ function Dashboard() {
       .then((datas) => updateChartData(datas.salesAmount))
       .catch((err) => console.log(err));
   };
+
+    useEffect(() => {
+    fetchTotalSaleAmount();
+    fetchTotalPurchaseAmount();
+    fetchStoresData();
+    fetchProductsData();
+    fetchMonthlySalesData();
+}, [fetchTotalSaleAmount, fetchTotalPurchaseAmount, fetchStoresData, fetchProductsData, fetchMonthlySalesData]);
 
   return (
     <>
