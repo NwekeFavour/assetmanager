@@ -11,7 +11,7 @@ function Store() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const fetchData = useCallback(() => {
     fetch(`http://localhost:4000/api/store/get/${authContext.user}`)

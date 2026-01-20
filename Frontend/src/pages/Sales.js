@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react"; // Added useCallback
 import AddSale from "../components/AddSale";
 import AuthContext from "../AuthContext";
 import { 
@@ -18,49 +18,53 @@ function Sales() {
 
   const authContext = useContext(AuthContext);
 
-  useEffect(() => {
-    fetchSalesData();
-    fetchProductsData();
-    fetchStoresData();
-  }, [updatePage]);
+  // --- Fixed Fetch Functions with useCallback and Dependency Arrays ---
 
-  // Calculations for Stats (Logic based on your sales state)
-  const totalRevenue = sales.reduce((acc, curr) => acc + curr.TotalSaleAmount, 0);
-  const totalItemsSold = sales.reduce((acc, curr) => acc + curr.StockSold, 0);
-
-  // ... (Your fetch functions remain exactly the same)
-  const fetchSalesData = () => {
+  const fetchSalesData = useCallback(() => {
     fetch(`http://localhost:4000/api/sales/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllSalesData(data))
       .catch((err) => console.log(err));
-  };
+  }, [authContext.user]);
 
-  const fetchProductsData = () => {
+  const fetchProductsData = useCallback(() => {
     fetch(`http://localhost:4000/api/product/get/${authContext.user}`)
       .then((response) => response.json())
-      .then((data) => setAllProducts(data));
-  };
+      .then((data) => setAllProducts(data))
+      .catch((err) => console.log(err));
+  }, [authContext.user]);
 
-  const fetchStoresData = () => {
+  const fetchStoresData = useCallback(() => {
     fetch(`http://localhost:4000/api/store/get/${authContext.user}`)
       .then((response) => response.json())
-      .then((data) => setAllStores(data));
-  };
+      .then((data) => setAllStores(data))
+      .catch((err) => console.log(err));
+  }, [authContext.user]);
+
+  // Fix: Included all memoized functions in the dependency array
+  useEffect(() => {
+    fetchSalesData();
+    fetchProductsData();
+    fetchStoresData();
+  }, [updatePage, fetchSalesData, fetchProductsData, fetchStoresData]);
+
+  // Calculations for Stats
+  const totalRevenue = sales.reduce((acc, curr) => acc + curr.TotalSaleAmount, 0);
+  const totalItemsSold = sales.reduce((acc, curr) => acc + curr.StockSold, 0);
 
   const addSaleModalSetting = () => setShowSaleModal(!showSaleModal);
   const handlePageUpdate = () => setUpdatePage(!updatePage);
 
   return (
-    <div className="flex flex-col gap-6 p-4 sm:p-6">
-      {/* 1. Sales Header & Summary Cards */}
+    <div className="flex flex-col gap-6 p-4 sm:p-8">
+      {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sales Transactions</h1>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Sales Transactions</h1>
           <p className="text-sm text-gray-500">Track and manage your revenue across all stores.</p>
         </div>
         <button
-          className="flex items-center gap-2 bg-[#8f5273] hover:bg-[#7a4562] text-white font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-all active:scale-95"
+          className="flex items-center gap-2 bg-[#8f5273] hover:bg-[#7a4562] text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-[#8f5273]/20 transition-all active:scale-95"
           onClick={addSaleModalSetting}
         >
           <PlusIcon className="h-5 w-5" />
@@ -68,6 +72,7 @@ function Sales() {
         </button>
       </div>
 
+      {/* 2. Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <SaleStatCard 
           title="Total Revenue" 
@@ -78,7 +83,7 @@ function Sales() {
         />
         <SaleStatCard 
           title="Items Sold" 
-          value={totalItemsSold} 
+          value={totalItemsSold.toLocaleString()} 
           icon={<ShoppingCartIcon className="h-6 w-6 text-blue-600" />}
           trend="+5 new orders today"
           trendColor="text-blue-500"
@@ -90,48 +95,48 @@ function Sales() {
         />
       </div>
 
-      {/* 2. Transactions Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-2">
+      {/* 3. Transactions Table */}
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-5 border-b border-gray-50 bg-gray-50/30">
-          <h3 className="font-bold text-gray-800">Recent History</h3>
+           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Recent History</h3>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white text-gray-400 text-[11px] uppercase tracking-widest border-b border-gray-100">
-                <th className="px-6 py-4 font-bold">Product Details</th>
-                <th className="px-6 py-4 font-bold">Store</th>
-                <th className="px-6 py-4 font-bold">Qty</th>
-                <th className="px-6 py-4 font-bold">Date</th>
-                <th className="px-6 py-4 font-bold text-right">Amount</th>
+              <tr className="bg-white text-gray-400 text-[11px] font-black uppercase tracking-[0.2em] border-b border-gray-100">
+                <th className="px-8 py-5">Product Details</th>
+                <th className="px-6 py-5">Store</th>
+                <th className="px-6 py-5">Qty</th>
+                <th className="px-6 py-5">Date</th>
+                <th className="px-8 py-5 text-right">Amount</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-sm">
               {sales.map((item) => (
                 <tr key={item._id} className="hover:bg-gray-50/50 transition-colors group">
-                  <td className="px-6 py-4">
+                  <td className="px-8 py-5">
                     <div className="font-bold text-gray-900 group-hover:text-[#8f5273] transition-colors">
                       {item.ProductID?.name || "Deleted Product"}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-gray-600">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-                      {item.StoreID?.name}
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-1.5 text-gray-600 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#8f5273]/30"></span>
+                      {item.StoreID?.name || "Main Store"}
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-medium text-gray-700">
+                  <td className="px-6 py-5 font-black text-gray-700">
                     {item.StockSold}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-5">
                     <div className="flex items-center gap-2 text-gray-500">
                       <CalendarDaysIcon className="h-4 w-4 text-gray-400" />
                       {new Date(item.SaleDate).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className="inline-block px-3 py-1 rounded-lg bg-green-50 text-green-700 font-bold">
+                  <td className="px-8 py-5 text-right">
+                    <span className="inline-block px-3 py-1 rounded-full bg-green-50 text-green-700 font-black text-[11px]">
                       ₦{item.TotalSaleAmount.toLocaleString()}
                     </span>
                   </td>
@@ -141,8 +146,9 @@ function Sales() {
           </table>
           
           {sales.length === 0 && (
-            <div className="p-20 text-center">
-              <p className="text-gray-400 italic">No sales transactions found.</p>
+            <div className="p-20 text-center flex flex-col items-center">
+              <ShoppingCartIcon className="h-12 w-12 text-gray-100 mb-2" />
+              <p className="text-gray-400 font-medium italic">No sales transactions found.</p>
             </div>
           )}
         </div>
@@ -161,16 +167,15 @@ function Sales() {
   );
 }
 
-// Sub-component for Sales Stats
 function SaleStatCard({ title, value, icon, trend, trendColor }) {
   return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-start justify-between">
+    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-start justify-between transition-all hover:shadow-md">
       <div>
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{title}</p>
-        <h3 className="text-2xl font-black text-gray-900">{value}</h3>
-        {trend && <p className={`text-[10px] mt-2 font-bold ${trendColor}`}>{trend}</p>}
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">{title}</p>
+        <h3 className="text-2xl font-black text-gray-900 tracking-tight">{value}</h3>
+        {trend && <p className={`text-[10px] mt-2 font-black uppercase tracking-wider ${trendColor}`}>{trend}</p>}
       </div>
-      <div className="p-3 bg-gray-50 rounded-xl">
+      <div className="p-3 bg-gray-50 rounded-2xl">
         {icon}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react"; // Added useCallback to main import
 import AddProduct from "../components/AddProduct";
 import UpdateProduct from "../components/UpdateProduct";
 import AuthContext from "../AuthContext";
@@ -11,7 +11,6 @@ import {
   ArrowPathIcon,
   ExclamationTriangleIcon
 } from "@heroicons/react/24/outline";
-import { useCallback } from "react";
 
 function Inventory() {
   const [showProductModal, setShowProductModal] = useState(false);
@@ -25,12 +24,10 @@ function Inventory() {
 
   const authContext = useContext(AuthContext);
 
-  useEffect(() => {
-    fetchProductsData();
-    fetchSalesData();
-  }, [updatePage]);
+  // --- Fixed Fetch Functions ---
 
-  const fetchProductsData =  useCallback(() => {
+  // 1. Added [authContext.user] dependency array
+  const fetchProductsData = useCallback(() => {
     setIsLoading(true);
     fetch(`http://localhost:4000/api/product/get/${authContext.user}`)
       .then((response) => response.json())
@@ -42,20 +39,33 @@ function Inventory() {
         console.log(err);
         setIsLoading(false);
       });
-  });
+  }, [authContext.user]);
 
-  const fetchSearchData = () => {
-    fetch(`http://localhost:4000/api/product/search?searchTerm=${searchTerm}`)
-      .then((response) => response.json())
-      .then((data) => setAllProducts(data))
-      .catch((err) => console.log(err));
-  };
-
+  // 2. Added [authContext.user] dependency array
   const fetchSalesData = useCallback(() => {
     fetch(`http://localhost:4000/api/store/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllStores(data));
-  });
+  }, [authContext.user]);
+
+  // 3. Fixed useEffect dependencies
+  useEffect(() => {
+    fetchProductsData();
+    fetchSalesData();
+  }, [updatePage, fetchProductsData, fetchSalesData]); 
+
+  // --- Other Functions ---
+
+  const fetchSearchData = useCallback(() => {
+    if (!searchTerm) {
+        fetchProductsData();
+        return;
+    }
+    fetch(`http://localhost:4000/api/product/search?searchTerm=${searchTerm}`)
+      .then((response) => response.json())
+      .then((data) => setAllProducts(data))
+      .catch((err) => console.log(err));
+  }, [searchTerm, fetchProductsData]);
 
   const addProductModalSetting = () => setShowProductModal(!showProductModal);
   
@@ -76,8 +86,18 @@ function Inventory() {
 
   const handleSearchTerm = (e) => {
     setSearchTerm(e.target.value);
-    fetchSearchData();
+    // Note: To avoid excessive API calls, you might want to call 
+    // fetchSearchData inside another useEffect triggered by searchTerm
   };
+
+  // Add this effect to handle search when searchTerm changes
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+        if(searchTerm) fetchSearchData();
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, fetchSearchData]);
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-8">
@@ -106,10 +126,10 @@ function Inventory() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Inventory" value={products.length} icon={<CubeIcon className="h-6 w-6"/>} color="blue" />
-        <StatCard title="Total Stores" value={stores.length} icon={<PlusIcon className="h-6 w-6"/>} color="yellow" />
-        <StatCard title="Stock Value" value="₦12,500" icon={<PlusIcon className="h-6 w-6"/>} color="purple" />
-        <StatCard title="Low Stock Units" value="12" icon={<ExclamationTriangleIcon className="h-6 w-6"/>} color="red" />
+        <StatCard title="Total Inventory" value={products.length} icon={<CubeIcon />} color="blue" />
+        <StatCard title="Total Stores" value={stores.length} icon={<PlusIcon />} color="yellow" />
+        <StatCard title="Stock Value" value="₦12,500" icon={<PlusIcon />} color="purple" />
+        <StatCard title="Low Stock Units" value="12" icon={<ExclamationTriangleIcon />} color="red" />
       </div>
 
       {/* Main Content Card */}

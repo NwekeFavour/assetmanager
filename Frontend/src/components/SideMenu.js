@@ -7,7 +7,6 @@ import {
   BarChart3, 
   Store, 
   Settings, 
-  LogOut 
 } from "lucide-react"; // Install lucide-react for sharper icons
 
 function SideMenu() {

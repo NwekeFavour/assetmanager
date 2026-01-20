@@ -89,8 +89,7 @@ function Dashboard() {
     fetchStoresData();
     fetchProductsData();
     fetchMonthlySalesData();
-  }, []);
-
+}, [fetchTotalSaleAmount, fetchTotalPurchaseAmount, fetchStoresData, fetchProductsData, fetchMonthlySalesData]);
   // Fetching total sales amount
   const fetchTotalSaleAmount = () => {
     fetch(
