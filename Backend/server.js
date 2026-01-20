@@ -13,7 +13,15 @@ const app = express();
 const PORT = 4000;
 main();
 app.use(express.json());
-app.use(cors());
+
+const corsOptions = {
+  origin: ["http://localhost:3000", "https://assetmanager-47fx.vercel.app"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // Allow cookies or auth headers if needed
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
+app.use(cors(cors));
 
 // Store API
 app.use("/api/store", storeRoute);
