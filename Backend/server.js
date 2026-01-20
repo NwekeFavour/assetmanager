@@ -95,7 +95,7 @@ app.get("/testget", async (req,res)=>{
 app.get('/', async (req,res) => {
   res.send("welcome to my server bitch!")
 })
-
+    
 // Here we are listening to the server
 app.listen(PORT, () => {
   console.log("I am live again");
