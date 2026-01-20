@@ -16,9 +16,6 @@ import AddProduct from "../components/AddProduct";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
-  const [stockValue, setStockValue] = useState(0);
-  const [outOfStock, setOutOfStock] = useState(0);
-  const [stores, setStores] = useState([]);
   const [products, setProducts] = useState([]);
   const authContext = useContext(AuthContext);
   const [showProductModal, setShowProductModal] = useState(false);
@@ -48,10 +45,26 @@ function Dashboard() {
     series: [{ name: "Inventory Value", data: new Array(12).fill(0) }],
   });
 
-  // API Fetch Functions (Simplified for brevity, keep your existing logic)
-  const fetchData = useCallback(() => {
-    // ... your existing fetch logic for valuation, alerts, stores, and products
-  }, [authContext.user]);
+  const userId = authContext.user;
+const fetchData = useCallback(() => {
+  if (!userId) return;
+
+  setIsLoading(true); // Assuming you have a loading state
+  
+  // Example API call - Update this URL to match your backend exactly
+  fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${userId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      // THIS IS THE KEY: update the products state
+      setProducts(data);
+      
+      // If you have chart data logic, update it here as well
+      // setChart(prev => ({ ...prev, series: [...] }));
+    })
+    .catch((err) => console.error("Error fetching dashboard data:", err))
+    .finally(() => setIsLoading(false));
+
+}, [userId]); // Use userId instead of the whole authContext object
 
   useEffect(() => {
     fetchData();
