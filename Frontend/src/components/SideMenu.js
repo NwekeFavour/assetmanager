@@ -1,89 +1,74 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  Package, 
+  ShoppingCart, 
+  BarChart3, 
+  Store, 
+  Settings, 
+  LogOut 
+} from "lucide-react"; // Install lucide-react for sharper icons
 
 function SideMenu() {
-  const localStorageData = JSON.parse(localStorage.getItem("user"));
+  const location = useLocation();
+  const userData = JSON.parse(localStorage.getItem("user")) || {};
+
+  const menuItems = [
+    { name: "Dashboard", href: "/", icon: LayoutDashboard },
+    { name: "Inventory", href: "/inventory", icon: Package },
+    { name: "Purchase Details", href: "/purchase-details", icon: ShoppingCart },
+    { name: "Sales", href: "/sales", icon: BarChart3 },
+    { name: "Manage Store", href: "/manage-store", icon: Store },
+  ];
 
   return (
-    <div className="h-full flex-col justify-between  bg-white hidden lg:flex ">
+    <div className="flex h-screen w-64 flex-col justify-between border-r border-gray-200 bg-white hidden lg:flex fixed left-0 top-0">
       <div className="px-4 py-6">
-        <nav aria-label="Main Nav" className="mt-6 flex flex-col space-y-1">
-          <Link
-            to="/"
-            className="flex items-center gap-2 rounded-lg hover:bg-gray-100 px-4 py-2 text-gray-700"
-          >
-            <img
-              alt="dashboard-icon"
-              src={require("../assets/dashboard-icon.png")}
-            />
-            <span className="text-sm font-medium"> Dashboard </span>
-          </Link>
+        {/* Logo Section */}
+        <div className="flex items-center gap-3 px-2 mb-8">
+          <div className="h-9 w-9 bg-[#8f5273] rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+             <span className="text-white font-bold text-xl">S</span>
+          </div>
+          <span className="text-xl font-bold tracking-tight text-gray-900">Shelf.nu</span>
+        </div>
 
-          <details className="group [&_summary::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-              <Link to="/inventory">
-                <div className="flex items-center gap-2">
-                  <img
-                    alt="inventory-icon"
-                    src={require("../assets/inventory-icon.png")}
-                  />
-                  <span className="text-sm font-medium"> Inventory </span>
-                </div>
+        <nav className="space-y-1">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-all duration-200 ${
+                  isActive
+                    ? "bg-indigo-50 text-indigo-700 shadow-sm"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <item.icon className={`h-5 w-5 ${isActive ? "text-indigo-600" : "text-gray-400"}`} />
+                <span className="text-sm font-semibold">{item.name}</span>
               </Link>
-            </summary>
-          </details>
-
-          <Link
-            to="/purchase-details"
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          >
-            <img
-              alt="purchase-icon"
-              src={require("../assets/supplier-icon.png")}
-            />
-            <span className="text-sm font-medium"> Purchase Details</span>
-          </Link>
-          <Link
-            to="/sales"
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          >
-            <img alt="sale-icon" src={require("../assets/supplier-icon.png")} />
-            <span className="text-sm font-medium"> Sales</span>
-          </Link>
-
-          <details className="group [&_summary::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-              <Link to="/manage-store">
-                <div className="flex items-center gap-2">
-                  <img
-                    alt="store-icon"
-                    src={require("../assets/order-icon.png")}
-                  />
-                  <span className="text-sm font-medium"> Manage Store </span>
-                </div>
-              </Link>
-            </summary>
-          </details>
+            );
+          })}
         </nav>
       </div>
 
-      <div className="sticky inset-x-0 bottom-0 border-t border-gray-100">
-        <div className="flex items-center gap-2 bg-white p-4 hover:bg-gray-50">
+      {/* User Section */}
+      <div className="p-4 border-t border-gray-100">
+        <div className="flex items-center gap-3 rounded-xl p-2 hover:bg-gray-50 transition-colors cursor-pointer group">
           <img
             alt="Profile"
-            src={localStorageData.imageUrl}
-            className="h-10 w-10 rounded-full object-cover"
+            src={userData.imageUrl || `https://ui-avatars.com/api/?name=${userData.firstName}`}
+            className="h-10 w-10 rounded-lg object-cover ring-2 ring-white shadow-sm"
           />
-
-          <div>
-            <p className="text-xs">
-              <strong className="block font-medium">
-                {localStorageData.firstName + " " + localStorageData.lastName}
-              </strong>
-
-              <span> {localStorageData.email} </span>
+          <div className="flex-1 overflow-hidden">
+            <p className="text-sm font-bold text-gray-900 truncate">
+              {userData.firstName} {userData.lastName}
             </p>
+            <p className="text-xs text-gray-500 truncate">{userData.email}</p>
           </div>
+          <Settings className="h-4 w-4 text-gray-400 group-hover:rotate-90 transition-transform" />
         </div>
       </div>
     </div>

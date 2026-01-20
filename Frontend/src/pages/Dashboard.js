@@ -94,7 +94,7 @@ function Dashboard() {
   // Fetching total sales amount
   const fetchTotalSaleAmount = () => {
     fetch(
-      `http://localhost:4000/api/sales/get/${authContext.user}/totalsaleamount`
+      `http://localhost:4000/api/sales/get/${authContext.user}/totalsaleamount`,
     )
       .then((response) => response.json())
       .then((datas) => setSaleAmount(datas.totalSaleAmount));
@@ -103,7 +103,7 @@ function Dashboard() {
   // Fetching total purchase amount
   const fetchTotalPurchaseAmount = () => {
     fetch(
-      `http://localhost:4000/api/purchase/get/${authContext.user}/totalpurchaseamount`
+      `http://localhost:4000/api/purchase/get/${authContext.user}/totalpurchaseamount`,
     )
       .then((response) => response.json())
       .then((datas) => setPurchaseAmount(datas.totalPurchaseAmount));
@@ -162,10 +162,10 @@ function Dashboard() {
 
             <p>
               <span className="text-2xl font-medium text-gray-900">
-                ${saleAmount}
+                ₦{saleAmount}
               </span>
 
-              <span className="text-xs text-gray-500"> from $240.94 </span>
+              <span className="text-xs text-gray-500"> from ₦240.94 </span>
             </p>
           </div>
         </article>
@@ -198,10 +198,10 @@ function Dashboard() {
             <p>
               <span className="text-2xl font-medium text-gray-900">
                 {" "}
-                ${purchaseAmount}{" "}
+                ₦{purchaseAmount}{" "}
               </span>
 
-              <span className="text-xs text-gray-500"> from $404.32 </span>
+              <span className="text-xs text-gray-500"> from ₦404.32 </span>
             </p>
           </div>
         </article>
@@ -236,7 +236,7 @@ function Dashboard() {
                 {products.length}{" "}
               </span>
 
-              {/* <span className="text-xs text-gray-500"> from $404.32 </span> */}
+              {/* <span className="text-xs text-gray-500"> from ₦404.32 </span> */}
             </p>
           </div>
         </article>
@@ -275,20 +275,48 @@ function Dashboard() {
             </p>
           </div>
         </article>
-        <div className="flex justify-around bg-white rounded-lg py-8 col-span-full justify-center">
-          <div>
-            <Chart
-              options={chart.options}
-              series={chart.series}
-              type="bar"
-              width="500"
-            />
-          </div>
-          <div>
-            <Doughnut data={data} />
-          </div>
-        </div>
+
       </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+  {/* Bar Chart Card */}
+  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm w-full">
+    <h3 className="text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wider">
+      Monthly Sales
+    </h3>
+    <div className="h-[300px] w-full">
+      <Chart
+        options={{
+          ...chart.options,
+          chart: { ...chart.options.chart, responsive: true },
+          legend: { position: 'bottom' }
+        }}
+        series={chart.series}
+        type="bar"
+        width="100%"   // Critical: fills the container
+        height="100%"  // Critical: fills the container
+      />
+    </div>
+  </div>
+
+  {/* Doughnut Chart Card */}
+  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm w-full">
+    <h3 className="text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wider">
+      Category Distribution
+    </h3>
+    <div className="h-[300px] w-full flex justify-center">
+      <Doughnut 
+        data={data} 
+        options={{
+          responsive: true,
+          maintainAspectRatio: false, // Allows it to fill the h-[300px] div
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }} 
+      />
+    </div>
+  </div>
+</div>
     </>
   );
 }

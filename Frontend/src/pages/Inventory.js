@@ -2,283 +2,229 @@ import React, { useState, useEffect, useContext } from "react";
 import AddProduct from "../components/AddProduct";
 import UpdateProduct from "../components/UpdateProduct";
 import AuthContext from "../AuthContext";
+import { 
+  PlusIcon, 
+  MagnifyingGlassIcon, 
+  PencilSquareIcon, 
+  TrashIcon, 
+  CubeIcon, 
+  ArrowPathIcon,
+  ExclamationTriangleIcon
+} from "@heroicons/react/24/outline";
 
 function Inventory() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateProduct, setUpdateProduct] = useState([]);
   const [products, setAllProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState();
+  const [searchTerm, setSearchTerm] = useState("");
   const [updatePage, setUpdatePage] = useState(true);
   const [stores, setAllStores] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const authContext = useContext(AuthContext);
-  console.log('====================================');
-  console.log(authContext);
-  console.log('====================================');
 
   useEffect(() => {
     fetchProductsData();
     fetchSalesData();
   }, [updatePage]);
 
-  // Fetching Data of All Products
   const fetchProductsData = () => {
+    setIsLoading(true);
     fetch(`http://localhost:4000/api/product/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => {
         setAllProducts(data);
+        setIsLoading(false);
       })
-      .catch((err) => console.log(err));
-  };
-
-  // Fetching Data of Search Products
-  const fetchSearchData = () => {
-    fetch(`http://localhost:4000/api/product/search?searchTerm=${searchTerm}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setAllProducts(data);
-      })
-      .catch((err) => console.log(err));
-  };
-
-  // Fetching all stores data
-  const fetchSalesData = () => {
-    fetch(`http://localhost:4000/api/store/get/${authContext.user}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setAllStores(data);
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
       });
   };
 
-  // Modal for Product ADD
-  const addProductModalSetting = () => {
-    setShowProductModal(!showProductModal);
+  const fetchSearchData = () => {
+    fetch(`http://localhost:4000/api/product/search?searchTerm=${searchTerm}`)
+      .then((response) => response.json())
+      .then((data) => setAllProducts(data))
+      .catch((err) => console.log(err));
   };
 
-  // Modal for Product UPDATE
+  const fetchSalesData = () => {
+    fetch(`http://localhost:4000/api/store/get/${authContext.user}`)
+      .then((response) => response.json())
+      .then((data) => setAllStores(data));
+  };
+
+  const addProductModalSetting = () => setShowProductModal(!showProductModal);
+  
   const updateProductModalSetting = (selectedProductData) => {
-    console.log("Clicked: edit");
     setUpdateProduct(selectedProductData);
     setShowUpdateModal(!showUpdateModal);
   };
 
-
-  // Delete item
   const deleteItem = (id) => {
-    console.log("Product ID: ", id);
-    console.log(`http://localhost:4000/api/product/delete/${id}`);
-    fetch(`http://localhost:4000/api/product/delete/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUpdatePage(!updatePage);
-      });
+    if(window.confirm("Are you sure you want to delete this product?")) {
+      fetch(`http://localhost:4000/api/product/delete/${id}`)
+        .then((response) => response.json())
+        .then(() => setUpdatePage(!updatePage));
+    }
   };
 
-  // Handle Page Update
-  const handlePageUpdate = () => {
-    setUpdatePage(!updatePage);
-  };
+  const handlePageUpdate = () => setUpdatePage(!updatePage);
 
-  // Handle Search Term
   const handleSearchTerm = (e) => {
     setSearchTerm(e.target.value);
     fetchSearchData();
   };
 
   return (
-    <div className="col-span-12 lg:col-span-10  flex justify-center">
-      <div className=" flex flex-col gap-5 w-11/12">
-        <div className="bg-white rounded p-3">
-          <span className="font-semibold px-4">Overall Inventory</span>
-          <div className=" flex flex-col md:flex-row justify-center items-center  ">
-            <div className="flex flex-col p-10  w-full  md:w-3/12  ">
-              <span className="font-semibold text-blue-600 text-base">
-                Total Products
-              </span>
-              <span className="font-semibold text-gray-600 text-base">
-                {products.length}
-              </span>
-              <span className="font-thin text-gray-400 text-xs">
-                Last 7 days
-              </span>
-            </div>
-            <div className="flex flex-col gap-3 p-10   w-full  md:w-3/12 sm:border-y-2  md:border-x-2 md:border-y-0">
-              <span className="font-semibold text-yellow-600 text-base">
-                Stores
-              </span>
-              <div className="flex gap-8">
-                <div className="flex flex-col">
-                  <span className="font-semibold text-gray-600 text-base">
-                    {stores.length}
-                  </span>
-                  <span className="font-thin text-gray-400 text-xs">
-                    Last 7 days
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-semibold text-gray-600 text-base">
-                    $2000
-                  </span>
-                  <span className="font-thin text-gray-400 text-xs">
-                    Revenue
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3 p-10  w-full  md:w-3/12  sm:border-y-2 md:border-x-2 md:border-y-0">
-              <span className="font-semibold text-purple-600 text-base">
-                Top Selling
-              </span>
-              <div className="flex gap-8">
-                <div className="flex flex-col">
-                  <span className="font-semibold text-gray-600 text-base">
-                    5
-                  </span>
-                  <span className="font-thin text-gray-400 text-xs">
-                    Last 7 days
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-semibold text-gray-600 text-base">
-                    $1500
-                  </span>
-                  <span className="font-thin text-gray-400 text-xs">Cost</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3 p-10  w-full  md:w-3/12  border-y-2  md:border-x-2 md:border-y-0">
-              <span className="font-semibold text-red-600 text-base">
-                Low Stocks
-              </span>
-              <div className="flex gap-8">
-                <div className="flex flex-col">
-                  <span className="font-semibold text-gray-600 text-base">
-                    12
-                  </span>
-                  <span className="font-thin text-gray-400 text-xs">
-                    Ordered
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-semibold text-gray-600 text-base">
-                    2
-                  </span>
-                  <span className="font-thin text-gray-400 text-xs">
-                    Not in Stock
-                  </span>
-                </div>
-              </div>
-            </div>
+    <div className="flex flex-col gap-6 p-4 sm:p-8">
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Inventory Management</h1>
+          <p className="text-gray-500 text-sm">Monitor stock levels, manufacturers, and product availability.</p>
+        </div>
+        <div className="flex gap-3 w-full lg:w-auto">
+          <button 
+            onClick={() => setUpdatePage(!updatePage)}
+            className="p-2.5 text-gray-400 hover:text-[#8f5273] bg-white border border-gray-200 rounded-xl hover:border-[#8f5273] transition-all"
+          >
+            <ArrowPathIcon className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-[#8f5273] hover:bg-[#7a4562] text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-[#8f5273]/20 transition-all active:scale-95"
+            onClick={addProductModalSetting}
+          >
+            <PlusIcon className="h-5 w-5" />
+            Create Product
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Total Inventory" value={products.length} icon={<CubeIcon className="h-6 w-6"/>} color="blue" />
+        <StatCard title="Total Stores" value={stores.length} icon={<PlusIcon className="h-6 w-6"/>} color="yellow" />
+        <StatCard title="Stock Value" value="₦12,500" icon={<PlusIcon className="h-6 w-6"/>} color="purple" />
+        <StatCard title="Low Stock Units" value="12" icon={<ExclamationTriangleIcon className="h-6 w-6"/>} color="red" />
+      </div>
+
+      {/* Main Content Card */}
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Search & Filter Bar */}
+        <div className="p-5 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="relative w-full md:w-96">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-[#8f5273]/20 transition-all"
+              placeholder="Search by SKU, name or manufacturer..."
+              value={searchTerm}
+              onChange={handleSearchTerm}
+            />
+          </div>
+          <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            Showing {products.length} Products
           </div>
         </div>
 
-        {showProductModal && (
-          <AddProduct
-            addProductModalSetting={addProductModalSetting}
-            handlePageUpdate={handlePageUpdate}
-          />
-        )}
-        {showUpdateModal && (
-          <UpdateProduct
-            updateProductData={updateProduct}
-            updateModalSetting={updateProductModalSetting}
-          />
-        )}
-
-        {/* Table  */}
-        <div className="overflow-x-auto rounded-lg border bg-white border-gray-200 ">
-          <div className="flex justify-between pt-5 pb-3 px-3">
-            <div className="flex gap-4 justify-center items-center ">
-              <span className="font-bold">Products</span>
-              <div className="flex justify-center items-center px-2 border-2 rounded-md ">
-                <img
-                  alt="search-icon"
-                  className="w-5 h-5"
-                  src={require("../assets/search-icon.png")}
-                />
-                <input
-                  className="border-none outline-none focus:border-none text-xs"
-                  type="text"
-                  placeholder="Search here"
-                  value={searchTerm}
-                  onChange={handleSearchTerm}
-                />
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 text-xs  rounded"
-                onClick={addProductModalSetting}
-              >
-                {/* <Link to="/inventory/add-product">Add Product</Link> */}
-                Add Product
-              </button>
-            </div>
-          </div>
-          <table className="min-w-full divide-y-2 divide-gray-200 text-sm">
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
             <thead>
-              <tr>
-                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Products
-                </th>
-                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Manufacturer
-                </th>
-                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Stock
-                </th>
-                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Description
-                </th>
-                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Availibility
-                </th>
-                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  More
-                </th>
+              <tr className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] bg-gray-50/50">
+                <th className="px-8 py-4">Item Identification</th>
+                <th className="px-6 py-4">Manufacturer</th>
+                <th className="px-6 py-4 text-center">In Stock</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-8 py-4 text-right">Operations</th>
               </tr>
             </thead>
-
-            <tbody className="divide-y divide-gray-200">
-              {products.map((element, index) => {
-                return (
-                  <tr key={element._id}>
-                    <td className="whitespace-nowrap px-4 py-2  text-gray-900">
-                      {element.name}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                      {element.manufacturer}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                      {element.stock}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                      {element.description}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                      {element.stock > 0 ? "In Stock" : "Not in Stock"}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                      <span
-                        className="text-green-700 cursor-pointer"
-                        onClick={() => updateProductModalSetting(element)}
+            <tbody className="divide-y divide-gray-50">
+              {products.map((item) => (
+                <tr key={item._id} className="group hover:bg-gray-50/80 transition-all">
+                  <td className="px-8 py-5">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-gray-900 group-hover:text-[#8f5273] transition-colors">{item.name}</span>
+                      <span className="text-xs text-gray-400 font-medium truncate max-w-[180px]">{item.description}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <span className="text-sm font-medium text-gray-600">{item.manufacturer}</span>
+                  </td>
+                  <td className="px-6 py-5 text-center font-black text-gray-700">
+                    {item.stock}
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      item.stock > 10 
+                        ? "bg-green-50 text-green-600" 
+                        : item.stock > 0 
+                        ? "bg-orange-50 text-orange-600" 
+                        : "bg-red-50 text-red-600"
+                    }`}>
+                      <span className={`w-1 h-1 rounded-full ${item.stock > 0 ? 'bg-current' : 'bg-red-600'}`}></span>
+                      {item.stock > 10 ? "Available" : item.stock > 0 ? "Low Stock" : "Out of Stock"}
+                    </div>
+                  </td>
+                  <td className="px-8 py-5 text-right">
+                    <div className="flex justify-end items-center gap-2">
+                      <button 
+                        onClick={() => updateProductModalSetting(item)}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                       >
-                        Edit{" "}
-                      </span>
-                      <span
-                        className="text-red-600 px-2 cursor-pointer"
-                        onClick={() => deleteItem(element._id)}
+                        <PencilSquareIcon className="h-5 w-5" />
+                      </button>
+                      <button 
+                        onClick={() => deleteItem(item._id)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                       >
-                        Delete
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
+
+          {products.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20">
+              <CubeIcon className="h-12 w-12 text-gray-200 mb-3" />
+              <p className="text-gray-400 font-medium italic">No products match your criteria</p>
+            </div>
+          )}
         </div>
+      </div>
+
+      {showProductModal && (
+        <AddProduct addProductModalSetting={addProductModalSetting} handlePageUpdate={handlePageUpdate} />
+      )}
+      {showUpdateModal && (
+        <UpdateProduct updateProductData={updateProduct} updateModalSetting={updateProductModalSetting} />
+      )}
+    </div>
+  );
+}
+
+function StatCard({ title, value, icon, color }) {
+  const colors = {
+    blue: "text-blue-600 bg-blue-50",
+    yellow: "text-amber-600 bg-amber-50",
+    purple: "text-purple-600 bg-purple-50",
+    red: "text-red-600 bg-red-50"
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center">
+      <div>
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">{title}</p>
+        <p className="text-2xl font-black text-gray-900">{value}</p>
+      </div>
+      <div className={`p-3 rounded-2xl ${colors[color]}`}>
+        {React.cloneElement(icon, { className: "h-6 w-6" })}
       </div>
     </div>
   );
