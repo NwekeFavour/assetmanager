@@ -1,7 +1,7 @@
 import { Fragment, useContext, useState } from "react";
 import { Menu, Transition, Popover, Dialog } from "@headlessui/react";
 import { 
-  Bell, Search, Plus, LogOut, Package, Info, 
+  Bell, Search, Plus, LogOut, Package, 
   Menu as MenuIcon, X, LayoutDashboard, Store, 
   ShoppingCart, ClipboardList 
 } from "lucide-react";

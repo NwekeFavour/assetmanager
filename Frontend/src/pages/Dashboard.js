@@ -30,7 +30,18 @@ function Dashboard() {
   const fetchInventoryValuation = useCallback(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${authContext.user}/valuation`)
       .then((res) => res.json())
-      .then((data) => setStockValue(data.totalValue || 0))
+      .then((data) => {
+        setStockValue(data.totalValue || 0);
+        
+        // If your API returns monthly data (e.g., data.monthlyValues = [10, 20, 15...])
+        // We update the chart series here
+        if (data.monthlyValues) {
+          setChart(prev => ({
+            ...prev,
+            series: [{ ...prev.series[0], data: data.monthlyValues }]
+          }));
+        }
+      })
       .catch((err) => console.error("Valuation Error:", err));
   }, [authContext.user]);
 
@@ -63,6 +74,17 @@ function Dashboard() {
     fetchProductsData();
   }, [fetchInventoryValuation, fetchStockAlerts, fetchStoresData, fetchProductsData]);
 
+
+  useEffect(() => {
+    if (products.length > 0) {
+      // Dummy logic: filling the last month with current stock value for visual impact
+      const dummyMonthlyData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, stockValue];
+      setChart(prev => ({
+        ...prev,
+        series: [{ ...prev.series[0], data: dummyMonthlyData }]
+      }));
+    }
+  }, [products, stockValue]);
   // Dynamic Doughnut Data based on actual Product Categories
   const categoryData = {
     labels: [...new Set(products.map(p => p.category || "Uncategorized"))],
