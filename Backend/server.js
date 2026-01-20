@@ -21,7 +21,7 @@ const corsOptions = {
   credentials: true, // Allow cookies or auth headers if needed
   optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 };
-app.use(cors(cors));
+app.use(cors(corsOptions));
 
 // Store API
 app.use("/api/store", storeRoute);
