@@ -1,10 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react"; // Added useCallback
 import Chart from "react-apexcharts";
 import AuthContext from "../AuthContext";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
+
 export const data = {
   labels: ["Apple", "Knorr", "Shoop", "Green", "Purple", "Orange"],
   datasets: [
@@ -37,27 +38,13 @@ function Dashboard() {
   const [purchaseAmount, setPurchaseAmount] = useState("");
   const [stores, setStores] = useState([]);
   const [products, setProducts] = useState([]);
+  const authContext = useContext(AuthContext);
 
   const [chart, setChart] = useState({
     options: {
-      chart: {
-        id: "basic-bar",
-      },
+      chart: { id: "basic-bar" },
       xaxis: {
-        categories: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ],
+        categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
       },
     },
     series: [
@@ -68,257 +55,166 @@ function Dashboard() {
     ],
   });
 
-  // Update Chart Data
-  const updateChartData = (salesData) => {
-    setChart({
-      ...chart,
+  // Update Chart Data Helper
+  const updateChartData = useCallback((salesData) => {
+    setChart((prevChart) => ({
+      ...prevChart,
       series: [
         {
           name: "Monthly Sales Amount",
           data: [...salesData],
         },
       ],
-    });
-  };
+    }));
+  }, []);
 
-  const authContext = useContext(AuthContext);
+  // --- Fixed Fetch Functions with useCallback ---
 
-
-  // Fetching total sales amount
-  const fetchTotalSaleAmount = () => {
-    fetch(
-      `http://localhost:4000/api/sales/get/${authContext.user}/totalsaleamount`,
-    )
+  const fetchTotalSaleAmount = useCallback(() => {
+    fetch(`http://localhost:4000/api/sales/get/${authContext.user}/totalsaleamount`)
       .then((response) => response.json())
-      .then((datas) => setSaleAmount(datas.totalSaleAmount));
-  };
+      .then((datas) => setSaleAmount(datas.totalSaleAmount))
+      .catch((err) => console.log(err));
+  }, [authContext.user]);
 
-  // Fetching total purchase amount
-  const fetchTotalPurchaseAmount = () => {
-    fetch(
-      `http://localhost:4000/api/purchase/get/${authContext.user}/totalpurchaseamount`,
-    )
+  const fetchTotalPurchaseAmount = useCallback(() => {
+    fetch(`http://localhost:4000/api/purchase/get/${authContext.user}/totalpurchaseamount`)
       .then((response) => response.json())
-      .then((datas) => setPurchaseAmount(datas.totalPurchaseAmount));
-  };
+      .then((datas) => setPurchaseAmount(datas.totalPurchaseAmount))
+      .catch((err) => console.log(err));
+  }, [authContext.user]);
 
-  // Fetching all stores data
-  const fetchStoresData = () => {
+  const fetchStoresData = useCallback(() => {
     fetch(`http://localhost:4000/api/store/get/${authContext.user}`)
       .then((response) => response.json())
-      .then((datas) => setStores(datas));
-  };
+      .then((datas) => setStores(datas))
+      .catch((err) => console.log(err));
+  }, [authContext.user]);
 
-  // Fetching Data of All Products
-  const fetchProductsData = () => {
+  const fetchProductsData = useCallback(() => {
     fetch(`http://localhost:4000/api/product/get/${authContext.user}`)
       .then((response) => response.json())
       .then((datas) => setProducts(datas))
       .catch((err) => console.log(err));
-  };
+  }, [authContext.user]);
 
-  // Fetching Monthly Sales
-  const fetchMonthlySalesData = () => {
+  const fetchMonthlySalesData = useCallback(() => {
     fetch(`http://localhost:4000/api/sales/getmonthly`)
       .then((response) => response.json())
       .then((datas) => updateChartData(datas.salesAmount))
       .catch((err) => console.log(err));
-  };
+  }, [updateChartData]);
 
-    useEffect(() => {
+  useEffect(() => {
     fetchTotalSaleAmount();
     fetchTotalPurchaseAmount();
     fetchStoresData();
     fetchProductsData();
     fetchMonthlySalesData();
-}, [fetchTotalSaleAmount, fetchTotalPurchaseAmount, fetchStoresData, fetchProductsData, fetchMonthlySalesData]);
+  }, [
+    fetchTotalSaleAmount, 
+    fetchTotalPurchaseAmount, 
+    fetchStoresData, 
+    fetchProductsData, 
+    fetchMonthlySalesData
+  ]);
 
   return (
-    <>
-      <div className="grid grid-cols-1 col-span-12 lg:col-span-10 gap-6 md:grid-cols-3 lg:grid-cols-4  p-4 ">
-        <article className="flex flex-col gap-4 rounded-lg border  border-gray-100 bg-white p-6  ">
-          <div className="inline-flex gap-2 self-end rounded bg-green-100 p-1 text-green-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-              />
-            </svg>
-
-            <span className="text-xs font-medium"> 67.81% </span>
-          </div>
-
-          <div>
-            <strong className="block text-sm font-medium text-gray-500">
-              Sales
-            </strong>
-
-            <p>
-              <span className="text-2xl font-medium text-gray-900">
-                ₦{saleAmount}
-              </span>
-
-              <span className="text-xs text-gray-500"> from ₦240.94 </span>
-            </p>
-          </div>
-        </article>
-
-        <article className="flex flex-col  gap-4 rounded-lg border border-gray-100 bg-white p-6 ">
-          <div className="inline-flex gap-2 self-end rounded bg-red-100 p-1 text-red-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
-              />
-            </svg>
-
-            <span className="text-xs font-medium"> 67.81% </span>
-          </div>
-
-          <div>
-            <strong className="block text-sm font-medium text-gray-500">
-              Purchase
-            </strong>
-
-            <p>
-              <span className="text-2xl font-medium text-gray-900">
-                {" "}
-                ₦{purchaseAmount}{" "}
-              </span>
-
-              <span className="text-xs text-gray-500"> from ₦404.32 </span>
-            </p>
-          </div>
-        </article>
-        <article className="flex flex-col   gap-4 rounded-lg border border-gray-100 bg-white p-6 ">
-          <div className="inline-flex gap-2 self-end rounded bg-red-100 p-1 text-red-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
-              />
-            </svg>
-
-            <span className="text-xs font-medium"> 67.81% </span>
-          </div>
-
-          <div>
-            <strong className="block text-sm font-medium text-gray-500">
-              Total Products
-            </strong>
-
-            <p>
-              <span className="text-2xl font-medium text-gray-900">
-                {" "}
-                {products.length}{" "}
-              </span>
-
-              {/* <span className="text-xs text-gray-500"> from ₦404.32 </span> */}
-            </p>
-          </div>
-        </article>
-        <article className="flex flex-col   gap-4 rounded-lg border border-gray-100 bg-white p-6 ">
-          <div className="inline-flex gap-2 self-end rounded bg-red-100 p-1 text-red-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
-              />
-            </svg>
-
-            <span className="text-xs font-medium"> 67.81% </span>
-          </div>
-
-          <div>
-            <strong className="block text-sm font-medium text-gray-500">
-              Total Stores
-            </strong>
-
-            <p>
-              <span className="text-2xl font-medium text-gray-900">
-                {" "}
-                {stores.length}{" "}
-              </span>
-
-              {/* <span className="text-xs text-gray-500"> from 0 </span> */}
-            </p>
-          </div>
-        </article>
-
+    <div className="flex flex-col gap-8 p-4 sm:p-8">
+      {/* Stat Cards Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <DashboardStatCard 
+          title="Sales" 
+          value={`₦${saleAmount}`} 
+          trend="67.81%" 
+          trendUp={true} 
+          subtext="from ₦240.94" 
+        />
+        <DashboardStatCard 
+          title="Purchase" 
+          value={`₦${purchaseAmount}`} 
+          trend="67.81%" 
+          trendUp={false} 
+          subtext="from ₦404.32" 
+        />
+        <DashboardStatCard 
+          title="Total Products" 
+          value={products.length} 
+          trend="Active" 
+          trendUp={true} 
+        />
+        <DashboardStatCard 
+          title="Total Stores" 
+          value={stores.length} 
+          trend="Online" 
+          trendUp={true} 
+        />
       </div>
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-  {/* Bar Chart Card */}
-  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm w-full">
-    <h3 className="text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wider">
-      Monthly Sales
-    </h3>
-    <div className="h-[300px] w-full">
-      <Chart
-        options={{
-          ...chart.options,
-          chart: { ...chart.options.chart, responsive: true },
-          legend: { position: 'bottom' }
-        }}
-        series={chart.series}
-        type="bar"
-        width="100%"   // Critical: fills the container
-        height="100%"  // Critical: fills the container
-      />
-    </div>
-  </div>
 
-  {/* Doughnut Chart Card */}
-  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm w-full">
-    <h3 className="text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wider">
-      Category Distribution
-    </h3>
-    <div className="h-[300px] w-full flex justify-center">
-      <Doughnut 
-        data={data} 
-        options={{
-          responsive: true,
-          maintainAspectRatio: false, // Allows it to fill the h-[300px] div
-          plugins: {
-            legend: { position: 'bottom' }
-          }
-        }} 
-      />
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm w-full">
+          <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">
+            Monthly Revenue Flow
+          </h3>
+          <div className="h-[300px] w-full">
+            <Chart
+              options={{
+                ...chart.options,
+                colors: ['#8f5273'],
+                plotOptions: { bar: { borderRadius: 8 } },
+                chart: { ...chart.options.chart, toolbar: { show: false } }
+              }}
+              series={chart.series}
+              type="bar"
+              width="100%"
+              height="100%"
+            />
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm w-full">
+          <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">
+            Category Distribution
+          </h3>
+          <div className="h-[300px] w-full flex justify-center">
+            <Doughnut 
+              data={data} 
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { weight: 'bold' } } } }
+              }} 
+            />
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-    </>
+  );
+}
+
+// Reusable Stat Card Component for cleaner Dashboard code
+function DashboardStatCard({ title, value, trend, trendUp, subtext }) {
+  return (
+    <article className="flex flex-col gap-4 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+      <div className={`inline-flex gap-2 self-end rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-wider ${trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+        <span>{trend}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d={trendUp ? "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" : "M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"} />
+        </svg>
+      </div>
+      <div>
+        <strong className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">
+          {title}
+        </strong>
+        <p className="mt-1">
+          <span className="text-2xl font-black text-gray-900 tracking-tight">
+            {value}
+          </span>
+          {subtext && <span className="ml-2 text-[10px] font-bold text-gray-400 italic block"> {subtext} </span>}
+        </p>
+      </div>
+    </article>
   );
 }
 
