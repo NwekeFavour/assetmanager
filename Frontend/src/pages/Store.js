@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import AddStore from "../components/AddStore";
 import AuthContext from "../AuthContext";
 import { MapPinIcon, PlusIcon, BuildingStorefrontIcon } from "@heroicons/react/24/outline";
+import { useCallback } from "react";
 
 function Store() {
   const [showModal, setShowModal] = useState(false);
@@ -12,12 +13,12 @@ function Store() {
     fetchData();
   }, []);
 
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
     fetch(`http://localhost:4000/api/store/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllStores(data))
       .catch((err) => console.error("Error fetching stores:", err));
-  };
+  });
 
   const modalSetting = () => setShowModal(!showModal);
 

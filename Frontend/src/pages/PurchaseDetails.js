@@ -8,6 +8,7 @@ import {
   PlusIcon,
   ArrowDownTrayIcon
 } from "@heroicons/react/24/outline";
+import { useCallback } from "react";
 
 function PurchaseDetails() {
   const [showPurchaseModal, setPurchaseModal] = useState(false);
@@ -26,19 +27,19 @@ function PurchaseDetails() {
   const totalExpenditure = purchase.reduce((acc, curr) => acc + curr.TotalPurchaseAmount, 0);
   const totalItemsBought = purchase.reduce((acc, curr) => acc + curr.QuantityPurchased, 0);
 
-  const fetchPurchaseData = () => {
+  const fetchPurchaseData = useCallback(() => {
     fetch(`http://localhost:4000/api/purchase/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllPurchaseData(data))
       .catch((err) => console.log(err));
-  };
+  });
 
-  const fetchProductsData = () => {
+  const fetchProductsData = useCallback(() => {
     fetch(`http://localhost:4000/api/product/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllProducts(data))
       .catch((err) => console.log(err));
-  };
+  });
 
   const addSaleModalSetting = () => setPurchaseModal(!showPurchaseModal);
   const handlePageUpdate = () => setUpdatePage(!updatePage);

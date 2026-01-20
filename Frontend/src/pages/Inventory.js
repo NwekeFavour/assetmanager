@@ -11,6 +11,7 @@ import {
   ArrowPathIcon,
   ExclamationTriangleIcon
 } from "@heroicons/react/24/outline";
+import { useCallback } from "react";
 
 function Inventory() {
   const [showProductModal, setShowProductModal] = useState(false);
@@ -29,7 +30,7 @@ function Inventory() {
     fetchSalesData();
   }, [updatePage]);
 
-  const fetchProductsData = () => {
+  const fetchProductsData =  useCallback(() => {
     setIsLoading(true);
     fetch(`http://localhost:4000/api/product/get/${authContext.user}`)
       .then((response) => response.json())
@@ -41,7 +42,7 @@ function Inventory() {
         console.log(err);
         setIsLoading(false);
       });
-  };
+  });
 
   const fetchSearchData = () => {
     fetch(`http://localhost:4000/api/product/search?searchTerm=${searchTerm}`)
@@ -50,11 +51,11 @@ function Inventory() {
       .catch((err) => console.log(err));
   };
 
-  const fetchSalesData = () => {
+  const fetchSalesData = useCallback(() => {
     fetch(`http://localhost:4000/api/store/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllStores(data));
-  };
+  });
 
   const addProductModalSetting = () => setShowProductModal(!showProductModal);
   

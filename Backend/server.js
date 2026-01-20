@@ -37,7 +37,7 @@ app.post("/api/login", async (req, res) => {
       email: req.body.email,
       password: req.body.password,
     });
-    console.log("USER: ", user);
+    // console.log("USER: ", user);
     if (user) {
       res.send(user);
       userAuthCheck = user;
