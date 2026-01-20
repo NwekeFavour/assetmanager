@@ -1,11 +1,8 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Package, 
-  ShoppingCart, 
   BarChart3, 
-  Store, 
   Settings, 
 } from "lucide-react"; // Install lucide-react for sharper icons
 
@@ -16,9 +13,7 @@ function SideMenu() {
   const menuItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Inventory", href: "/inventory", icon: Package },
-    { name: "Purchase Details", href: "/purchase-details", icon: ShoppingCart },
     { name: "Disposals & Transfers", href: "/sales", icon: BarChart3 },
-    { name: "Manage Store", href: "/manage-store", icon: Store },
   ];
 
   return (

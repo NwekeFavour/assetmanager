@@ -40,9 +40,7 @@ const notifications = [
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Inventory', href: '/inventory', icon: Package },
-  { name: 'Purchase', href: '/purchase', icon: ShoppingCart },
   { name: 'Disposals & Transfers', href: '/sales', icon: ClipboardList },
-  { name: 'Stores', href: '/stores', icon: Store },
 ];
 
 export default function Header() {
