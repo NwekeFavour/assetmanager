@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 import Chart from "react-apexcharts";
 import AuthContext from "../AuthContext";
 import { Doughnut } from "react-chartjs-2";
@@ -17,6 +17,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const authContext = useContext(AuthContext);
   const [showProductModal, setShowProductModal] = useState(false);
   const [chart, setChart] = useState({
@@ -46,25 +47,24 @@ function Dashboard() {
   });
 
   const userId = authContext.user;
-const fetchData = useCallback(() => {
-  if (!userId) return;
+  const fetchData = useCallback(() => {
+    if (!userId) return;
 
-  setIsLoading(true); // Assuming you have a loading state
-  
-  // Example API call - Update this URL to match your backend exactly
-  fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${userId}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // THIS IS THE KEY: update the products state
-      setProducts(data);
-      
-      // If you have chart data logic, update it here as well
-      // setChart(prev => ({ ...prev, series: [...] }));
-    })
-    .catch((err) => console.error("Error fetching dashboard data:", err))
-    .finally(() => setIsLoading(false));
+    setIsLoading(true); // Assuming you have a loading state
 
-}, [userId]); // Use userId instead of the whole authContext object
+    // Example API call - Update this URL to match your backend exactly
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${userId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        // THIS IS THE KEY: update the products state
+        setProducts(data);
+
+        // If you have chart data logic, update it here as well
+        // setChart(prev => ({ ...prev, series: [...] }));
+      })
+      .catch((err) => console.error("Error fetching dashboard data:", err))
+      .finally(() => setIsLoading(false));
+  }, [userId]); // Use userId instead of the whole authContext object
 
   useEffect(() => {
     fetchData();
@@ -94,6 +94,36 @@ const fetchData = useCallback(() => {
       },
     ],
   };
+
+  // 1. Add this useEffect to process chart data whenever products are updated
+  useEffect(() => {
+    if (products.length > 0) {
+      // Initialize an array of 12 zeros for each month
+      const monthlyData = new Array(12).fill(0);
+
+      products.forEach((product) => {
+        // Use purchaseDate or createdAt. Fallback to current date if missing.
+        const date = product.purchaseDate
+          ? new Date(product.purchaseDate)
+          : new Date();
+        const month = date.getMonth(); // 0 = Jan, 11 = Dec
+
+        // We'll chart the stock count per month.
+        // Change to (product.price * product.stock) if you want valuation.
+        monthlyData[month] += Number(product.stock) || 0;
+      });
+
+      setChart((prev) => ({
+        ...prev,
+        series: [
+          {
+            name: "Total Stock",
+            data: monthlyData,
+          },
+        ],
+      }));
+    }
+  }, [products]); // Runs every time products are fetched or updated
   return (
     <div className="flex flex-col gap-8 p-3 sm:p-6 bg-[#fafafa] min-h-screen">
       {/* 1. Welcome & Onboarding Header (Matches Image 2 Style) */}
@@ -169,21 +199,42 @@ const fetchData = useCallback(() => {
       <hr className="border-gray-100" />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
+        <div className="xl:col-span-2 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm min-h-[400px] flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-              Inventory Turnover
+              Inventory Growth
             </h3>
             <span className="text-[10px] font-bold text-[#8f5273] bg-[#8f5273]/10 px-2 py-1 rounded-md">
-              Live Data
+              Yearly View
             </span>
           </div>
-          <Chart
-            options={chart.options}
-            series={chart.series}
-            type="bar"
-            height={300}
-          />
+
+          <div className="flex-1">
+            {products.length > 0 ? (
+              <Chart
+                options={chart.options}
+                series={chart.series}
+                type="bar"
+                height="100%"
+              />
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center py-10">
+                <div className="w-full h-32 bg-gray-50 rounded-xl flex items-end justify-around p-4 mb-4">
+                  {/* Minimalist CSS bars to represent an empty chart */}
+                  {[40, 70, 45, 90, 65].map((h, i) => (
+                    <div
+                      key={i}
+                      style={{ height: `${h}%` }}
+                      className="w-4 bg-gray-100 rounded-t-sm"
+                    />
+                  ))}
+                </div>
+                <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">
+                  No activity recorded yet
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col min-h-[400px]">
@@ -192,7 +243,14 @@ const fetchData = useCallback(() => {
           </h3>
 
           <div className="flex-1 flex flex-col items-center justify-center relative">
-            {products.length > 0 ? (
+            {isLoading ? (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-8 h-8 border-4 border-[#8f5273]/20 border-t-[#8f5273] rounded-full animate-spin"></div>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  Loading Assets...
+                </p>
+              </div>
+            ) : products.length > 0 ? (
               <div className="h-[300px] w-full">
                 <Doughnut
                   data={categoryData}
@@ -245,13 +303,13 @@ const fetchData = useCallback(() => {
       </div>
 
       {showProductModal && (
-        <AddProduct 
-          addProductModalSetting={addProductModalSetting} 
+        <AddProduct
+          addProductModalSetting={addProductModalSetting}
           handlePageUpdate={() => {
             /* your fetch logic to refresh data */
-            fetchData(); 
+            fetchData();
             setShowProductModal(false);
-          }} 
+          }}
         />
       )}
     </div>
