@@ -71,35 +71,35 @@ function Dashboard() {
   // --- Fixed Fetch Functions with useCallback ---
 
   const fetchTotalSaleAmount = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/sales/get/${authContext.user}/totalsaleamount`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/sales/get/${authContext.user}/totalsaleamount`)
       .then((response) => response.json())
       .then((datas) => setSaleAmount(datas.totalSaleAmount))
       .catch((err) => console.log(err));
   }, [authContext.user]);
 
   const fetchTotalPurchaseAmount = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/purchase/get/${authContext.user}/totalpurchaseamount`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/purchase/get/${authContext.user}/totalpurchaseamount`)
       .then((response) => response.json())
       .then((datas) => setPurchaseAmount(datas.totalPurchaseAmount))
       .catch((err) => console.log(err));
   }, [authContext.user]);
 
   const fetchStoresData = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/store/get/${authContext.user}`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/store/get/${authContext.user}`)
       .then((response) => response.json())
       .then((datas) => setStores(datas))
       .catch((err) => console.log(err));
   }, [authContext.user]);
 
   const fetchProductsData = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product/get/${authContext.user}`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${authContext.user}`)
       .then((response) => response.json())
       .then((datas) => setProducts(datas))
       .catch((err) => console.log(err));
   }, [authContext.user]);
 
   const fetchMonthlySalesData = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/sales/getmonthly`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/sales/getmonthly`)
       .then((response) => response.json())
       .then((datas) => updateChartData(datas.salesAmount))
       .catch((err) => console.log(err));

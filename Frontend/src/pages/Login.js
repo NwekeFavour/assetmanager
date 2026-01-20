@@ -12,14 +12,13 @@ function Login() {
   const authContext = useContext(AuthContext);
   const navigate = useNavigate();
 
-
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const authCheck = () => {
     setTimeout(() => {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/login`)
+      fetch(`${process.env.REACT_APP_BACKEND_URL}/api/login`)
         .then((response) => response.json())
         .then((data) => {
           alert("Successfully Login");
@@ -40,7 +39,7 @@ function Login() {
     if (form.email === "" || form.password === "") {
       alert("To login user, enter details to proceed...");
     } else {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/login`, {
+      fetch(`${process.env.REACT_APP_BACKEND_URL}/api/login`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",

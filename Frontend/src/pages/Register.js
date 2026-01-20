@@ -21,7 +21,7 @@ function Register() {
 
   // Register User
   const registerUser = () => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/register`, {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/register`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",

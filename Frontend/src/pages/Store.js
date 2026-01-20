@@ -10,7 +10,7 @@ function Store() {
 
   // Fix: Added dependency array [authContext.user] to useCallback
   const fetchData = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/store/get/${authContext.user}`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/store/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllStores(data))
       .catch((err) => console.error("Error fetching stores:", err));

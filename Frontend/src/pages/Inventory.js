@@ -29,7 +29,7 @@ function Inventory() {
   // 1. Added [authContext.user] dependency array
   const fetchProductsData = useCallback(() => {
     setIsLoading(true);
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product/get/${authContext.user}`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => {
         setAllProducts(data);
@@ -43,7 +43,7 @@ function Inventory() {
 
   // 2. Added [authContext.user] dependency array
   const fetchSalesData = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/store/get/${authContext.user}`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/store/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllStores(data));
   }, [authContext.user]);
@@ -61,7 +61,7 @@ function Inventory() {
         fetchProductsData();
         return;
     }
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product/search?searchTerm=${searchTerm}`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/search?searchTerm=${searchTerm}`)
       .then((response) => response.json())
       .then((data) => setAllProducts(data))
       .catch((err) => console.log(err));
@@ -76,7 +76,7 @@ function Inventory() {
 
   const deleteItem = (id) => {
     if(window.confirm("Are you sure you want to delete this product?")) {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product/delete/${id}`)
+      fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/delete/${id}`)
         .then((response) => response.json())
         .then(() => setUpdatePage(!updatePage));
     }

@@ -21,7 +21,7 @@ function PurchaseDetails() {
 
   // Fix: Added [authContext.user] as the second argument
   const fetchPurchaseData = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/purchase/get/${authContext.user}`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/purchase/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllPurchaseData(data))
       .catch((err) => console.log(err));
@@ -29,7 +29,7 @@ function PurchaseDetails() {
 
   // Fix: Added [authContext.user] as the second argument
   const fetchProductsData = useCallback(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product/get/${authContext.user}`)
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/product/get/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => setAllProducts(data))
       .catch((err) => console.log(err));
