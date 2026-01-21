@@ -28,7 +28,7 @@ function SideMenu() {
           <div className="h-9 w-9 bg-[#8f5273] rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
              <span className="text-white font-bold text-xl">S</span>
           </div>
-          <span className="text-xl font-bold tracking-tight text-gray-900">Shelf.nu</span>
+          <span className="text-xl font-bold tracking-tight text-gray-900">Assets</span>
         </div>
 
         <nav className="space-y-1">
